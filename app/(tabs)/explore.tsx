@@ -1,3 +1,4 @@
+import { useUserStore } from "@/globalStore/userSotre";
 import { supabase } from "@/util/supabase"; // adjust path
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -13,6 +14,7 @@ export default function LogoutScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { clearUser } = useUserStore();
 
   const handleLogout = async () => {
     setLoading(true);
@@ -24,6 +26,7 @@ export default function LogoutScreen() {
         setError(error.message);
         return;
       }
+      clearUser();
 
       // Redirect to login/welcome page
     } catch (err: any) {

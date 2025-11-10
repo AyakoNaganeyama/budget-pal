@@ -1,3 +1,4 @@
+import { useUserStore } from "@/globalStore/userSotre";
 import { supabase } from "@/util/supabase";
 import { useState } from "react";
 
@@ -9,6 +10,7 @@ interface SignupData {
 
 export default function useSignup() {
   const [passError, setPassError] = useState<string | null>(null);
+  const { setUser } = useUserStore();
 
   const signup = async ({ fullName, email, pass }: SignupData) => {
     setPassError(null);
@@ -34,6 +36,7 @@ export default function useSignup() {
     }
 
     if (data.user && data.session) {
+      setUser(data.user.id, data.user.email!);
       console.log("✅ Signup successful and signed in.");
       return "signedIn";
     }

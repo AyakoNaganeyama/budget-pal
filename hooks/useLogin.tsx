@@ -1,3 +1,4 @@
+import { useUserStore } from "@/globalStore/userSotre";
 import { supabase } from "@/util/supabase";
 import { useState } from "react";
 
@@ -9,6 +10,7 @@ interface LoginData {
 export default function useLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setUser } = useUserStore();
 
   const login = async ({ email, pass }: LoginData) => {
     setLoading(true);
@@ -30,6 +32,8 @@ export default function useLogin() {
         setError("User not found");
         throw new Error("User not found");
       }
+
+      setUser(data.user.id, data.user.email!);
 
       console.log("✅ Login successful for:", email);
       return data.user; // return the user object
