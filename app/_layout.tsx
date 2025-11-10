@@ -1,4 +1,5 @@
-import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { createNavTheme } from "@/constants/theme";
+import { ThemeProvider } from "@react-navigation/native";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
@@ -10,6 +11,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const theme = createNavTheme(colorScheme);
   const router = useRouter();
 
   useEffect(() => {
@@ -42,9 +44,9 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ThemeProvider value={DefaultTheme}>
+    <ThemeProvider value={theme}>
       <Stack screenOptions={{ headerShown: false }} />
-      <StatusBar style="dark" />
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </ThemeProvider>
   );
 }
