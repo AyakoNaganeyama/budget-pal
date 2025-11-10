@@ -19,11 +19,11 @@ export default function RootLayout() {
         console.log("🟡 Auth state changed:", event);
 
         if ((event === "INITIAL_SESSION" || event === "SIGNED_IN") && session) {
-          router.replace("./(auth)/login"); // your single user route
+          router.replace("/(tabs)");
         }
 
         if (event === "SIGNED_OUT" || !session) {
-          router.replace("/(tabs)"); // redirect to login/welcome
+          router.replace("/(auth)/login"); // redirect to login/welcome
         }
       }
     );
