@@ -77,7 +77,7 @@ export default function DashboardScreen() {
           </Text>
 
           {/* Render the chart */}
-          <MonthlyDonutChart />
+          <MonthlyDonutChart transactions={displayTransactions} />
 
           {/* Transactions Cards */}
           <View style={{ marginTop: 30 }}>

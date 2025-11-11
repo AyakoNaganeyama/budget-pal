@@ -1,5 +1,4 @@
 import { getMonthlyTransactions } from "@/api/getMonthly";
-import { useTransactionStore } from "@/globalStore/transactionStore";
 import { supabase } from "@/util/supabase";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -12,11 +11,17 @@ interface Transaction {
   };
 }
 
-export default function MonthlyDonutChart() {
+interface MonthlyDonutChartProps {
+  transactions: Transaction[];
+}
+
+export default function MonthlyDonutChart({
+  transactions,
+}: MonthlyDonutChartProps) {
   const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const transactions = useTransactionStore((state) => state.transactions);
+  // const transactions = useTransactionStore((state) => state.transactions);
 
   // Get current user ID from Supabase session
   const getUserId = async (): Promise<string | null> => {
