@@ -41,11 +41,13 @@ export default function MonthlyDonutChart({
       grouped[categoryName] = (grouped[categoryName] || 0) + t.amount;
     });
 
-    const formatted = Object.entries(grouped).map(([text, value], index) => ({
-      text,
-      value,
-      color: ["#FF8C00", "#4CAF50", "#2196F3", "#E91E63"][index % 4],
-    }));
+    const formatted = Object.entries(grouped).map(
+      ([text, value], index, arr) => {
+        const hue = (index * 360) / arr.length; // spread colors around the hue wheel
+        const color = `hsl(${hue}, 70%, 50%)`;
+        return { text, value, color };
+      }
+    );
 
     setChartData(formatted);
   }, [transactions]);
