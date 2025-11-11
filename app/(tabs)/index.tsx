@@ -39,7 +39,10 @@ export default function DashboardScreen() {
             color: themeColors.text,
           }}
         >
-          My Dashboard
+          {new Date().toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+          })}
         </Text>
 
         {/* Render the chart */}

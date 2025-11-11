@@ -107,6 +107,40 @@ export default function MonthlyDonutChart() {
         focusOnPress
         showTooltip
       />
+
+      {/* Category totals list */}
+      <View style={{ marginTop: 20, width: "80%" }}>
+        {chartData.map((item, index) => (
+          <View
+            key={index}
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 8,
+              paddingVertical: 6,
+              borderBottomWidth: 1,
+              borderBottomColor: "#ddd",
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <View
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: 7,
+                  backgroundColor: item.color,
+                  marginRight: 8,
+                }}
+              />
+              <Text style={{ fontSize: 16, color: "white" }}>{item.text}</Text>
+            </View>
+            <Text style={{ fontWeight: "bold", color: "white" }}>
+              ${item.value.toFixed(2)}
+            </Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
