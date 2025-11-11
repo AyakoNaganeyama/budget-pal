@@ -1,8 +1,9 @@
+import { deleteTransaction } from "@/api/deleteTransaction";
 import { Colors } from "@/constants/theme";
 import { Transaction } from "@/globalStore/transactionStore";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 interface TransactionCardsProps {
   transactions: Transaction[];
   colorScheme: "light" | "dark";
@@ -22,6 +23,13 @@ export default function TransactionCards({
     );
   }
 
+  const onDlete = async (id: string) => {
+    const success = await deleteTransaction(id);
+    if (success) {
+      Alert.alert("Transaction deleted:", id);
+    }
+  };
+
   return (
     <>
       {transactions.map((t) => (
@@ -29,9 +37,20 @@ export default function TransactionCards({
           key={t.id}
           style={[styles.card, { backgroundColor: themeColors.cardBackground }]}
         >
-          <Text style={[styles.amount, { color: themeColors.text }]}>
-            ${t.amount.toFixed(2)}
-          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={[styles.amount, { color: themeColors.text }]}>
+              ${t.amount.toFixed(2)}
+            </Text>
+            <TouchableOpacity onPress={() => onDlete(t.id)}>
+              <MaterialIcons name="delete-outline" size={24} color="red" />
+            </TouchableOpacity>
+          </View>
           <Text style={[styles.category, { color: themeColors.text }]}>
             {t.category_id?.name || "Unknown"}
           </Text>

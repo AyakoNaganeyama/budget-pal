@@ -1,4 +1,3 @@
-// transactionStore.ts
 import { create } from "zustand";
 
 export interface Transaction {
@@ -14,6 +13,7 @@ interface TransactionStore {
   setTransactions: (data: Transaction[]) => void;
   addTransaction: (transaction: Transaction) => void;
   clearTransactions: () => void;
+  removeTransaction: (id: string) => void; // <-- add this
 }
 
 export const useTransactionStore = create<TransactionStore>((set) => ({
@@ -22,4 +22,8 @@ export const useTransactionStore = create<TransactionStore>((set) => ({
   addTransaction: (transaction) =>
     set((state) => ({ transactions: [...state.transactions, transaction] })),
   clearTransactions: () => set({ transactions: [] }),
+  removeTransaction: (id) =>
+    set((state) => ({
+      transactions: state.transactions.filter((t) => t.id !== id),
+    })),
 }));
