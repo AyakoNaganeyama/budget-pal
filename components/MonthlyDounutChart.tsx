@@ -1,4 +1,5 @@
 import { getMonthlyTransactions } from "@/api/getMonthly";
+import { useTransactionStore } from "@/globalStore/transactionStore";
 import { supabase } from "@/util/supabase";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -15,6 +16,7 @@ export default function MonthlyDonutChart() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const transactions = useTransactionStore((state) => state.transactions);
 
   // Get current user ID from Supabase session
   const getUserId = async (): Promise<string | null> => {
@@ -25,6 +27,23 @@ export default function MonthlyDonutChart() {
     }
     return sessionData.session?.user.id || null;
   };
+
+  useEffect(() => {
+    const grouped: Record<string, number> = {};
+
+    transactions.forEach((t) => {
+      const categoryName = t.category_id?.name || "Unknown";
+      grouped[categoryName] = (grouped[categoryName] || 0) + t.amount;
+    });
+
+    const formatted = Object.entries(grouped).map(([text, value], index) => ({
+      text,
+      value,
+      color: ["#FF8C00", "#4CAF50", "#2196F3", "#E91E63"][index % 4],
+    }));
+
+    setChartData(formatted);
+  }, [transactions]); // <- this ensures the chart updates automatically
 
   useEffect(() => {
     const fetchData = async () => {
