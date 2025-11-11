@@ -1,4 +1,5 @@
 import { getMonthlyTransactions } from "@/api/getMonthly";
+import TransactionCards from "@/components/Cards";
 import AddTransactionModal from "@/components/Modal";
 import MonthlyDonutChart from "@/components/MonthlyDounutChart";
 import { Colors } from "@/constants/theme";
@@ -80,40 +81,10 @@ export default function DashboardScreen() {
 
           {/* Transactions Cards */}
           <View style={{ marginTop: 30 }}>
-            {displayTransactions.length === 0 ? (
-              <Text
-                style={{ textAlign: "center", color: themeColors.inactive }}
-              >
-                No transactions to display
-              </Text>
-            ) : (
-              displayTransactions.map((t) => (
-                <View
-                  key={t.id}
-                  style={[
-                    styles.card,
-                    { backgroundColor: themeColors.cardBackground },
-                  ]}
-                >
-                  <Text style={[styles.amount, { color: themeColors.text }]}>
-                    ${t.amount.toFixed(2)}
-                  </Text>
-                  <Text style={[styles.category, { color: themeColors.text }]}>
-                    {t.category_id?.name || "Unknown"}
-                  </Text>
-                  <Text style={[styles.date, { color: themeColors.inactive }]}>
-                    {t.date
-                      ? new Date(t.date).toLocaleDateString()
-                      : "Unknown date"}
-                  </Text>
-                  {t.description && (
-                    <Text style={[styles.desc, { color: themeColors.text }]}>
-                      {t.description}
-                    </Text>
-                  )}
-                </View>
-              ))
-            )}
+            <TransactionCards
+              transactions={displayTransactions}
+              colorScheme={colorScheme ?? "light"}
+            />
           </View>
         </ScrollView>
 

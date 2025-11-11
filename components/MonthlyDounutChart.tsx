@@ -43,7 +43,7 @@ export default function MonthlyDonutChart() {
     }));
 
     setChartData(formatted);
-  }, [transactions]); // <- this ensures the chart updates automatically
+  }, [transactions]);
 
   useEffect(() => {
     const fetchData = async () => {
