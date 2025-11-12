@@ -7,11 +7,13 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 interface TransactionCardsProps {
   transactions: Transaction[];
   colorScheme: "light" | "dark";
+  onEdit?: (id: string) => void; // pass callback
 }
 
 export default function TransactionCards({
   transactions,
   colorScheme,
+  onEdit,
 }: TransactionCardsProps) {
   const themeColors = Colors[colorScheme ?? "light"];
 
@@ -44,9 +46,11 @@ export default function TransactionCards({
               alignItems: "center",
             }}
           >
-            <Text style={[styles.amount, { color: themeColors.text }]}>
-              ${t.amount.toFixed(2)}
-            </Text>
+            <TouchableOpacity onPress={() => onEdit?.(t.id)}>
+              <Text style={[styles.amount, { color: themeColors.text }]}>
+                ${t.amount.toFixed(2)}
+              </Text>
+            </TouchableOpacity>
             <TouchableOpacity onPress={() => onDlete(t.id)}>
               <MaterialIcons name="delete-outline" size={24} color="red" />
             </TouchableOpacity>

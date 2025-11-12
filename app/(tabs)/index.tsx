@@ -2,12 +2,13 @@ import { getMonthlyTransactions } from "@/api/getMonthly";
 import TransactionCards from "@/components/Cards";
 import AddTransactionModal from "@/components/Modal";
 import MonthlyDonutChart from "@/components/MonthlyDounutChart";
+import EditTransactionModal from "@/components/TransactionModal";
 import { Colors } from "@/constants/theme";
 import { useTransactionStore } from "@/globalStore/transactionStore";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { supabase } from "@/util/supabase";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -20,9 +21,16 @@ export default function DashboardScreen() {
   const transactions = useTransactionStore((state) => state.transactions);
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? "light"];
-  const [showModal, setShowModal] = React.useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [displayTransactions, setDisplayTransactions] =
     React.useState(transactions);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedTransactionId, setSelectedTransactionId] = useState("");
+
+  const handleEdit = (id: string) => {
+    setSelectedTransactionId(id);
+    setEditModalVisible(true);
+  };
 
   // Example: open modal or navigate on button press
   const handleAddPress = () => {
@@ -84,6 +92,7 @@ export default function DashboardScreen() {
             <TransactionCards
               transactions={displayTransactions}
               colorScheme={colorScheme ?? "light"}
+              onEdit={handleEdit}
             />
           </View>
         </ScrollView>
@@ -101,6 +110,13 @@ export default function DashboardScreen() {
         visible={showModal}
         onClose={() => setShowModal(false)}
         onSaved={refreshTransactions}
+      />
+
+      <EditTransactionModal
+        visible={editModalVisible}
+        onClose={() => setEditModalVisible(false)}
+        transactionId={selectedTransactionId}
+        onUpdated={refreshTransactions}
       />
     </>
   );
