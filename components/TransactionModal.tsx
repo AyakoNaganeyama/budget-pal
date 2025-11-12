@@ -196,15 +196,14 @@ export default function EditTransactionModal({
 
               {/* Buttons */}
               <View style={styles.buttons}>
-                <TouchableOpacity style={styles.button} onPress={handleSave}>
-                  <Text style={styles.buttonText}>Save</Text>
-                </TouchableOpacity>
-
                 <TouchableOpacity
                   style={[styles.button, styles.cancel]}
                   onPress={onClose}
                 >
                   <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={handleSave}>
+                  <Text style={styles.buttonText}>Save</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>

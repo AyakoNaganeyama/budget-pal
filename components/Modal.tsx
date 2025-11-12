@@ -192,15 +192,6 @@ export default function AddTransactionModal({
               {/* Buttons */}
               <View style={styles.buttons}>
                 <TouchableOpacity
-                  style={styles.button}
-                  onPress={handleSave}
-                  disabled={loading}
-                >
-                  <Text style={styles.buttonText}>
-                    {loading ? "Saving..." : "Save"}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
                   style={[styles.button, styles.cancel]}
                   onPress={() => {
                     onClose();
@@ -208,6 +199,15 @@ export default function AddTransactionModal({
                   }}
                 >
                   <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleSave}
+                  disabled={loading}
+                >
+                  <Text style={styles.buttonText}>
+                    {loading ? "Saving..." : "Save"}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
