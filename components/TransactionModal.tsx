@@ -289,11 +289,10 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   button: {
-    flex: 1,
     backgroundColor: "#4CAF50",
-    padding: 10,
+    padding: 12,
     borderRadius: 5,
-    marginHorizontal: 5,
+    margin: 10,
     alignItems: "center",
   },
   cancel: { backgroundColor: "#f44336" },
@@ -302,6 +301,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
     backgroundColor: "rgba(0,0,0,0.5)",
+    paddingBottom: 20,
   },
   pickerModal: {
     backgroundColor: "#1e1e1e",
