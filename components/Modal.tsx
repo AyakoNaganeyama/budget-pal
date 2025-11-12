@@ -4,6 +4,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -12,8 +13,8 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
-  useColorScheme,
 } from "react-native";
 
 interface AddTransactionModalProps {
@@ -27,20 +28,21 @@ export default function AddTransactionModal({
   onClose,
   onSaved,
 }: AddTransactionModalProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
   const addTransaction = useTransactionStore((state) => state.addTransaction);
 
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("expense");
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [category, setCategory] = useState<string | undefined>();
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
     []
   );
+  const [date, setDate] = useState(new Date());
+  const [description, setDescription] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [categoryPickerVisible, setCategoryPickerVisible] = useState(false);
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
 
   // Fetch categories
   useEffect(() => {
@@ -49,7 +51,6 @@ export default function AddTransactionModal({
         .from("categories")
         .select("id, name")
         .order("name");
-
       if (error) console.error("Error fetching categories:", error);
       else setCategories(data || []);
     };
@@ -58,151 +59,147 @@ export default function AddTransactionModal({
 
   const resetForm = () => {
     setAmount("");
-    setDescription("");
-    setCategoryId(null);
-    setDate(new Date());
     setType("expense");
+    setCategory(undefined);
+    setDate(new Date());
+    setDescription("");
+    setErrorMsg("");
   };
 
-  // Save transaction
   const handleSave = async () => {
-    if (!amount || !categoryId) {
-      alert("Please enter an amount and select a category.");
+    if (!amount || !category) {
+      setErrorMsg("Amount and category are required.");
       return;
     }
 
     setLoading(true);
-
     const {
       data: { session },
     } = await supabase.auth.getSession();
 
     if (!session) {
-      alert("User not logged in");
+      setErrorMsg("User not logged in");
       setLoading(false);
       return;
     }
 
-    const newTransaction = {
-      user_id: session.user.id,
-      amount: Number(amount),
-      type,
-      category_id: categoryId,
-      description,
-      date: date.toISOString().split("T")[0],
-    };
-
     const { data, error } = await supabase
       .from("transactions")
-      .insert([newTransaction])
+      .insert([
+        {
+          user_id: session.user.id,
+          amount: Number(amount),
+          type,
+          category_id: category,
+          description,
+          date: date.toISOString().split("T")[0],
+        },
+      ])
       .select()
-      .single(); // get the inserted transaction back
+      .single();
 
     if (error) {
-      console.error("Error saving transaction:", error);
-      alert("Failed to save transaction");
+      setErrorMsg("Failed to save transaction");
+      console.error(error);
     } else {
-      // ✅ Add the new transaction to the store immediately
-      const addTransaction = useTransactionStore.getState().addTransaction;
-
-      // Map the inserted transaction to your store format
       addTransaction({
         id: data.id,
         amount: data.amount,
-        category_id: data.category_id, // make sure matches your store interface
-        date: data.date,
+        type: data.type,
+        category_id: data.category_id,
         description: data.description,
+        date: data.date,
       });
-
-      onSaved && (await onSaved()); // optional: refetch if needed
+      onSaved();
       onClose();
-      setAmount("");
-      setDescription("");
-      setCategoryId(null);
-      setDate(new Date());
-      setType("expense");
+      resetForm();
     }
-
     setLoading(false);
   };
 
-  const styles = getStyles(isDark);
-
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.overlay}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1 }}
-        >
-          <View style={styles.modalContainer}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modal}>
             <ScrollView
-              showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 20 }}
               keyboardShouldPersistTaps="handled"
             >
               <Text style={styles.title}>Add Transaction</Text>
 
+              {errorMsg ? <Text style={styles.error}>{errorMsg}</Text> : null}
+
               <TextInput
+                style={styles.input}
                 placeholder="Amount"
-                placeholderTextColor={isDark ? "#aaa" : "#777"}
+                placeholderTextColor="#aaa"
                 keyboardType="numeric"
                 value={amount}
                 onChangeText={setAmount}
-                style={styles.input}
               />
 
-              <View style={styles.pickerWrapper}>
-                <Picker
-                  selectedValue={type}
-                  onValueChange={setType}
-                  style={styles.picker}
+              {/* Type picker */}
+              <View style={{ marginVertical: 5 }}>
+                <Text style={styles.label}>Type</Text>
+                <TouchableOpacity
+                  style={styles.input}
+                  onPress={() =>
+                    setType(type === "expense" ? "income" : "expense")
+                  }
                 >
-                  <Picker.Item label="Expense" value="expense" />
-                  <Picker.Item label="Income" value="income" />
-                </Picker>
+                  <Text style={{ color: "white" }}>{type}</Text>
+                </TouchableOpacity>
               </View>
 
-              <View style={styles.pickerWrapper}>
-                <Picker
-                  selectedValue={categoryId}
-                  onValueChange={setCategoryId}
-                  style={styles.picker}
+              {/* Category picker */}
+              <View style={{ marginVertical: 5 }}>
+                <Text style={styles.label}>Category</Text>
+                <TouchableOpacity
+                  style={styles.input}
+                  onPress={() => setCategoryPickerVisible(true)}
                 >
-                  <Picker.Item label="Select Category" value={null} />
-                  {categories.map((c) => (
-                    <Picker.Item key={c.id} label={c.name} value={c.id} />
-                  ))}
-                </Picker>
+                  <Text style={{ color: category ? "white" : "#aaa" }}>
+                    {category
+                      ? categories.find((c) => c.id === category)?.name
+                      : "Select Category"}
+                  </Text>
+                </TouchableOpacity>
               </View>
 
-              <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-                <Text style={styles.dateText}>
-                  Date: {date.toLocaleDateString()}
-                </Text>
-              </TouchableOpacity>
-
-              {showDatePicker && (
-                <DateTimePicker
-                  value={date}
-                  mode="date"
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
-                  onChange={(event, selectedDate) => {
-                    setShowDatePicker(false);
-                    if (selectedDate) setDate(selectedDate);
-                  }}
-                />
-              )}
+              {/* Date picker */}
+              <View style={{ marginVertical: 5 }}>
+                <Text style={styles.label}>Date</Text>
+                <TouchableOpacity
+                  style={styles.input}
+                  onPress={() => setDatePickerVisible(true)}
+                >
+                  <Text style={{ color: "white" }}>{date.toDateString()}</Text>
+                </TouchableOpacity>
+              </View>
 
               <TextInput
+                style={styles.input}
                 placeholder="Description (optional)"
-                placeholderTextColor={isDark ? "#aaa" : "#777"}
+                placeholderTextColor="#aaa"
                 value={description}
                 onChangeText={setDescription}
-                style={styles.input}
               />
 
-              <View style={styles.buttonRow}>
+              {/* Buttons */}
+              <View style={styles.buttons}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleSave}
+                  disabled={loading}
+                >
+                  <Text style={styles.buttonText}>
+                    {loading ? "Saving..." : "Save"}
+                  </Text>
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.button, styles.cancel]}
                   onPress={() => {
@@ -212,91 +209,118 @@ export default function AddTransactionModal({
                 >
                   <Text style={styles.buttonText}>Cancel</Text>
                 </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.button, styles.save]}
-                  onPress={handleSave}
-                  disabled={loading}
-                >
-                  <Text style={styles.buttonText}>
-                    {loading ? "Saving..." : "Save"}
-                  </Text>
-                </TouchableOpacity>
               </View>
             </ScrollView>
           </View>
-        </KeyboardAvoidingView>
-      </View>
+        </TouchableWithoutFeedback>
+
+        {/* Category Picker Modal */}
+        {categoryPickerVisible && (
+          <Modal transparent animationType="slide">
+            <View style={styles.pickerModalContainer}>
+              <View style={styles.pickerModal}>
+                <Picker
+                  selectedValue={category}
+                  onValueChange={(val) => setCategory(val)}
+                >
+                  {categories.map((c) => (
+                    <Picker.Item key={c.id} label={c.name} value={c.id} />
+                  ))}
+                </Picker>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => setCategoryPickerVisible(false)}
+                >
+                  <Text style={styles.buttonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        )}
+
+        {/* Date Picker Modal */}
+        {datePickerVisible && (
+          <Modal transparent animationType="slide">
+            <View style={styles.pickerModalContainer}>
+              <View style={styles.pickerModal}>
+                <DateTimePicker
+                  value={date}
+                  mode="date"
+                  display="spinner"
+                  onChange={(_, selectedDate) => {
+                    if (selectedDate) setDate(selectedDate);
+                    setDatePickerVisible(false);
+                  }}
+                  textColor="black"
+                  style={{ width: "100%" }}
+                />
+              </View>
+            </View>
+          </Modal>
+        )}
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
-// Themed styles
-const getStyles = (isDark: boolean) =>
-  StyleSheet.create({
-    overlay: {
-      flex: 1,
-      justifyContent: "flex-end",
-      backgroundColor: "rgba(0,0,0,0.5)",
-    },
-    modalContainer: {
-      maxHeight: "90%",
-      width: "100%",
-      backgroundColor: isDark ? "#121212" : "#fff",
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      padding: 20,
-    },
-    title: {
-      fontSize: 20,
-      fontWeight: "bold",
-      marginBottom: 15,
-      textAlign: "center",
-      color: isDark ? "#fff" : "#000",
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: isDark ? "#444" : "#ccc",
-      borderRadius: 6,
-      padding: 10,
-      marginBottom: 12,
-      color: isDark ? "#fff" : "#000",
-      backgroundColor: isDark ? "#1e1e1e" : "#fff",
-    },
-    pickerWrapper: {
-      borderWidth: 1,
-      borderColor: isDark ? "#444" : "#ccc",
-      borderRadius: 6,
-      marginBottom: 12,
-      backgroundColor: isDark ? "#1e1e1e" : "#f9f9f9",
-    },
-    picker: {
-      color: isDark ? "#fff" : "#000",
-    },
-    dateText: {
-      marginBottom: 12,
-      color: isDark ? "#ddd" : "#555",
-    },
-    buttonRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      marginTop: 10,
-    },
-    button: {
-      flex: 1,
-      padding: 12,
-      borderRadius: 6,
-      alignItems: "center",
-    },
-    cancel: {
-      backgroundColor: "#888",
-      marginRight: 10,
-    },
-    save: {
-      backgroundColor: "#4CAF50",
-    },
-    buttonText: {
-      color: "white",
-      fontWeight: "bold",
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.7)",
+  },
+  modal: {
+    width: "90%",
+    backgroundColor: "#1e1e1e",
+    borderRadius: 10,
+    padding: 20,
+    maxHeight: "80%",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "white",
+  },
+  label: {
+    color: "white",
+    marginBottom: 5,
+    fontWeight: "500",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#555",
+    borderRadius: 5,
+    padding: 10,
+    marginVertical: 5,
+    color: "white",
+    backgroundColor: "#2c2c2c",
+  },
+  error: { color: "red", textAlign: "center", marginBottom: 8 },
+  buttons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 15,
+  },
+  button: {
+    backgroundColor: "#4CAF50",
+    padding: 12,
+    borderRadius: 5,
+    margin: 10,
+    alignItems: "center",
+    flex: 1,
+  },
+  cancel: { backgroundColor: "#f44336" },
+  buttonText: { color: "white", fontWeight: "bold" },
+  pickerModalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingBottom: 20,
+  },
+  pickerModal: {
+    backgroundColor: "#1e1e1e",
+    padding: 20,
+  },
+});
