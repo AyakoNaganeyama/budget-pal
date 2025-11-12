@@ -19,6 +19,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { KeyboardAccessoryNavigation } from "react-native-keyboard-accessory";
 
 interface EditTransactionModalProps {
   visible: boolean;
@@ -123,143 +124,151 @@ export default function EditTransactionModal({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.modal}>
-            <ScrollView
-              contentContainerStyle={{ paddingBottom: 20 }}
-              keyboardShouldPersistTaps="handled"
-            >
-              <Text style={styles.title}>Edit Transaction</Text>
+    <>
+      <Modal visible={visible} animationType="slide" transparent>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.modal}>
+              <ScrollView
+                contentContainerStyle={{ paddingBottom: 20 }}
+                keyboardShouldPersistTaps="handled"
+              >
+                <Text style={styles.title}>Edit Transaction</Text>
 
-              <TextInput
-                style={styles.input}
-                placeholder="Amount"
-                placeholderTextColor="#aaa"
-                keyboardType="numeric"
-                value={amount}
-                onChangeText={setAmount}
-              />
-
-              {/* Type picker */}
-              <View style={{ marginVertical: 5 }}>
-                <Text style={{ color: "white", marginBottom: 5 }}>Type</Text>
-                <TouchableOpacity
+                <TextInput
                   style={styles.input}
-                  onPress={() =>
-                    setType(type === "expense" ? "income" : "expense")
-                  }
-                >
-                  <Text style={{ color: "white" }}>{type}</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Category picker */}
-              <View style={{ marginVertical: 5 }}>
-                <Text style={{ color: "white", marginBottom: 5 }}>
-                  Category
-                </Text>
-                <TouchableOpacity
-                  style={styles.input}
-                  onPress={() => setCategoryPickerVisible(true)}
-                >
-                  <Text style={{ color: category ? "white" : "#aaa" }}>
-                    {category
-                      ? categories.find((c) => c.id === category)?.name
-                      : "Select Category"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Date picker */}
-              <View style={{ marginVertical: 5 }}>
-                <Text style={{ color: "white", marginBottom: 5 }}>Date</Text>
-                <TouchableOpacity
-                  style={styles.input}
-                  onPress={() => setDatePickerVisible(true)}
-                >
-                  <Text style={{ color: "white" }}>{date.toDateString()}</Text>
-                </TouchableOpacity>
-              </View>
-
-              <TextInput
-                style={styles.input}
-                placeholder="Description"
-                placeholderTextColor="#aaa"
-                value={description}
-                onChangeText={setDescription}
-              />
-
-              {/* Buttons */}
-              <View style={styles.buttons}>
-                <TouchableOpacity
-                  style={[styles.button, styles.cancel]}
-                  onPress={onClose}
-                >
-                  <Text style={styles.buttonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={handleSave}>
-                  <Text style={styles.buttonText}>Save</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
-        </TouchableWithoutFeedback>
-
-        {/* Category Picker Modal */}
-        {categoryPickerVisible && (
-          <Modal transparent animationType="slide">
-            <View style={styles.pickerModalContainer}>
-              <View style={styles.pickerModal}>
-                <Picker
-                  selectedValue={category}
-                  onValueChange={(val) => setCategory(val)}
-                >
-                  {categories.map((c) => (
-                    <Picker.Item key={c.id} label={c.name} value={c.id} />
-                  ))}
-                </Picker>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => setCategoryPickerVisible(false)}
-                >
-                  <Text style={styles.buttonText}>Close</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-        )}
-
-        {/* Date Picker Modal */}
-        {datePickerVisible && (
-          <Modal transparent animationType="slide">
-            <View style={styles.pickerModalContainer}>
-              <View style={styles.pickerModal}>
-                <DateTimePicker
-                  value={date}
-                  mode="date"
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
-                  onChange={(_, selectedDate) => {
-                    if (selectedDate) setDate(selectedDate);
-                  }}
-                  style={{ width: "100%" }}
+                  placeholder="Amount"
+                  placeholderTextColor="#aaa"
+                  keyboardType="numeric"
+                  value={amount}
+                  onChangeText={setAmount}
                 />
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => setDatePickerVisible(false)}
-                >
-                  <Text style={styles.buttonText}>Close</Text>
-                </TouchableOpacity>
-              </View>
+
+                {/* Type picker */}
+                <View style={{ marginVertical: 5 }}>
+                  <Text style={{ color: "white", marginBottom: 5 }}>Type</Text>
+                  <TouchableOpacity
+                    style={styles.input}
+                    onPress={() =>
+                      setType(type === "expense" ? "income" : "expense")
+                    }
+                  >
+                    <Text style={{ color: "white" }}>{type}</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Category picker */}
+                <View style={{ marginVertical: 5 }}>
+                  <Text style={{ color: "white", marginBottom: 5 }}>
+                    Category
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.input}
+                    onPress={() => setCategoryPickerVisible(true)}
+                  >
+                    <Text style={{ color: category ? "white" : "#aaa" }}>
+                      {category
+                        ? categories.find((c) => c.id === category)?.name
+                        : "Select Category"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Date picker */}
+                <View style={{ marginVertical: 5 }}>
+                  <Text style={{ color: "white", marginBottom: 5 }}>Date</Text>
+                  <TouchableOpacity
+                    style={styles.input}
+                    onPress={() => setDatePickerVisible(true)}
+                  >
+                    <Text style={{ color: "white" }}>
+                      {date.toDateString()}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Description"
+                  placeholderTextColor="#aaa"
+                  value={description}
+                  onChangeText={setDescription}
+                />
+
+                {/* Buttons */}
+                <View style={styles.buttons}>
+                  <TouchableOpacity
+                    style={[styles.button, styles.cancel]}
+                    onPress={onClose}
+                  >
+                    <Text style={styles.buttonText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.button} onPress={handleSave}>
+                    <Text style={styles.buttonText}>Save</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
             </View>
-          </Modal>
-        )}
-      </KeyboardAvoidingView>
-    </Modal>
+          </TouchableWithoutFeedback>
+
+          {/* Category Picker Modal */}
+          {categoryPickerVisible && (
+            <Modal transparent animationType="slide">
+              <View style={styles.pickerModalContainer}>
+                <View style={styles.pickerModal}>
+                  <Picker
+                    selectedValue={category}
+                    onValueChange={(val) => setCategory(val)}
+                  >
+                    {categories.map((c) => (
+                      <Picker.Item key={c.id} label={c.name} value={c.id} />
+                    ))}
+                  </Picker>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setCategoryPickerVisible(false)}
+                  >
+                    <Text style={styles.buttonText}>Close</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+          )}
+
+          {/* Date Picker Modal */}
+          {datePickerVisible && (
+            <Modal transparent animationType="slide">
+              <View style={styles.pickerModalContainer}>
+                <View style={styles.pickerModal}>
+                  <DateTimePicker
+                    value={date}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={(_, selectedDate) => {
+                      if (selectedDate) setDate(selectedDate);
+                    }}
+                    style={{ width: "100%" }}
+                  />
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setDatePickerVisible(false)}
+                  >
+                    <Text style={styles.buttonText}>Close</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+          )}
+        </KeyboardAvoidingView>
+      </Modal>
+      <KeyboardAccessoryNavigation
+        doneButtonTitle="Done"
+        onDone={Keyboard.dismiss}
+      />
+    </>
   );
 }
 
