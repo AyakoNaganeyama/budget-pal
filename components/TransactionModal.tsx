@@ -51,7 +51,7 @@ export default function EditTransactionModal({
   const [categoryPickerVisible, setCategoryPickerVisible] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
 
-  // Fetch categories
+  // Fetch categories from Supabase
   useEffect(() => {
     const fetchCategories = async () => {
       const { data, error } = await supabase
@@ -77,6 +77,7 @@ export default function EditTransactionModal({
     }
   }, [transactionId, transactions]);
 
+  // Save edited transaction
   const handleSave = async () => {
     if (!transaction) return;
 
@@ -97,8 +98,12 @@ export default function EditTransactionModal({
       .eq("id", transaction.id)
       .eq("user_id", session.user.id);
 
-    if (error) return;
+    if (error) {
+      console.error("Error updating transaction:", error);
+      return;
+    }
 
+    // Update Zustand store
     const updatedTransactions = transactions.map((t) =>
       t.id === transaction.id
         ? {
@@ -189,6 +194,7 @@ export default function EditTransactionModal({
                 onChangeText={setDescription}
               />
 
+              {/* Buttons */}
               <View style={styles.buttons}>
                 <TouchableOpacity style={styles.button} onPress={handleSave}>
                   <Text style={styles.buttonText}>Save</Text>
@@ -229,7 +235,7 @@ export default function EditTransactionModal({
           </Modal>
         )}
 
-        {/* Date Picker Modal (iOS) */}
+        {/* Date Picker Modal */}
         {datePickerVisible && (
           <Modal transparent animationType="slide">
             <View style={styles.pickerModalContainer}>
@@ -237,14 +243,18 @@ export default function EditTransactionModal({
                 <DateTimePicker
                   value={date}
                   mode="date"
-                  display="spinner"
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
                   onChange={(_, selectedDate) => {
                     if (selectedDate) setDate(selectedDate);
-                    setDatePickerVisible(false);
                   }}
-                  textColor="black"
                   style={{ width: "100%" }}
                 />
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => setDatePickerVisible(false)}
+                >
+                  <Text style={styles.buttonText}>Close</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </Modal>

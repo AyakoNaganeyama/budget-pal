@@ -218,7 +218,7 @@ export default function AddTransactionModal({
         {categoryPickerVisible && (
           <Modal transparent animationType="slide">
             <View style={styles.pickerModalContainer}>
-              <View style={styles.pickerModal}>
+              <View style={styles.pickerModalIOS}>
                 <Picker
                   selectedValue={category}
                   onValueChange={(val) => setCategory(val)}
@@ -238,25 +238,41 @@ export default function AddTransactionModal({
           </Modal>
         )}
 
-        {/* Date Picker Modal */}
-        {datePickerVisible && (
+        {/* Date Picker */}
+        {datePickerVisible && Platform.OS === "ios" && (
           <Modal transparent animationType="slide">
             <View style={styles.pickerModalContainer}>
-              <View style={styles.pickerModal}>
+              <View style={styles.pickerModalIOS}>
                 <DateTimePicker
                   value={date}
                   mode="date"
                   display="spinner"
                   onChange={(_, selectedDate) => {
                     if (selectedDate) setDate(selectedDate);
-                    setDatePickerVisible(false);
                   }}
-                  textColor="black"
                   style={{ width: "100%" }}
                 />
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => setDatePickerVisible(false)}
+                >
+                  <Text style={styles.buttonText}>Close</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </Modal>
+        )}
+
+        {datePickerVisible && Platform.OS === "android" && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display="default"
+            onChange={(_, selectedDate) => {
+              setDatePickerVisible(false);
+              if (selectedDate) setDate(selectedDate);
+            }}
+          />
         )}
       </KeyboardAvoidingView>
     </Modal>
@@ -309,7 +325,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     margin: 10,
     alignItems: "center",
-    flex: 1,
+
+    marginBottom: 30,
   },
   cancel: { backgroundColor: "#f44336" },
   buttonText: { color: "white", fontWeight: "bold" },
@@ -322,5 +339,13 @@ const styles = StyleSheet.create({
   pickerModal: {
     backgroundColor: "#1e1e1e",
     padding: 20,
+  },
+  pickerModalIOS: {
+    backgroundColor: "#1e1e1e",
+    padding: 20,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    justifyContent: "flex-end", // content sticks to bottom
+    maxHeight: "50%", // prevents modal from taking full screen
   },
 });
