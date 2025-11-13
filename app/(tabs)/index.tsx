@@ -181,7 +181,7 @@ export default function DashboardScreen() {
             </Text>
           )}
 
-          {/* Transactions Cards */}
+          {/* Transactions Cards test*/}
           {displayTransactions.length > 0 && (
             <View style={{ marginTop: 30 }}>
               <TransactionCards
