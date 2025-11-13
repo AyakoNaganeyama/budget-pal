@@ -132,19 +132,25 @@ export default function DashboardScreen() {
 
               {/* Save Button */}
               <TouchableOpacity
-                onPress={() => {
+                onPress={async () => {
                   setShowPicker(false);
 
-                  // Update monthYearLabel for Android or final selection
+                  // Log the selected label
                   const label = selectedDate.toLocaleString("default", {
                     month: "long",
                     year: "numeric",
                   });
-                  setMonthYearLabel(label);
                   console.log("Saved Month/Year:", label);
 
-                  // Optionally refresh transactions for selected month
-                  // refreshTransactionsForMonth(selectedDate);
+                  setMonthYearLabel(label);
+
+                  // Fetch transactions for the selected month
+                  const {
+                    data: { session },
+                  } = await supabase.auth.getSession();
+                  if (session) {
+                    await getMonthlyTransactions(session.user.id, selectedDate);
+                  }
                 }}
                 style={{
                   backgroundColor: themeColors.tint,
@@ -182,6 +188,7 @@ export default function DashboardScreen() {
                 transactions={displayTransactions}
                 colorScheme={colorScheme ?? "light"}
                 onEdit={handleEdit}
+                selectedDate={selectedDate}
               />
             </View>
           )}
@@ -200,14 +207,30 @@ export default function DashboardScreen() {
       <AddTransactionModal
         visible={showModal}
         onClose={() => setShowModal(false)}
-        onSaved={refreshTransactions}
+        onSaved={async () => {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+
+          if (session) {
+            await getMonthlyTransactions(session.user.id, selectedDate);
+          }
+        }}
       />
 
       <EditTransactionModal
         visible={editModalVisible}
         onClose={() => setEditModalVisible(false)}
         transactionId={selectedTransactionId}
-        onUpdated={refreshTransactions}
+        onUpdated={async () => {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+
+          if (session) {
+            await getMonthlyTransactions(session.user.id, selectedDate);
+          }
+        }}
       />
     </>
   );

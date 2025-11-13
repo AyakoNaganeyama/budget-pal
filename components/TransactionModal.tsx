@@ -105,19 +105,19 @@ export default function EditTransactionModal({
     }
 
     // Update Zustand store
-    const updatedTransactions = transactions.map((t) =>
-      t.id === transaction.id
-        ? {
-            ...t,
-            amount: Number(amount),
-            type,
-            category_id: categories.filter((c) => c.id === category),
-            date: date.toISOString(),
-            description,
-          }
-        : t
-    );
-    updateTransactionInStore(updatedTransactions);
+    // const updatedTransactions = transactions.map((t) =>
+    //   t.id === transaction.id
+    //     ? {
+    //         ...t,
+    //         amount: Number(amount),
+    //         type,
+    //         category_id: categories.filter((c) => c.id === category),
+    //         date: date.toISOString(),
+    //         description,
+    //       }
+    //     : t
+    // );
+    // updateTransactionInStore(updatedTransactions);
 
     onUpdated?.();
     onClose();

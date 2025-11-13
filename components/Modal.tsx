@@ -1,9 +1,9 @@
-import { useTransactionStore } from "@/globalStore/transactionStore";
 import { supabase } from "@/util/supabase";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Modal,
@@ -28,7 +28,7 @@ export default function AddTransactionModal({
   onClose,
   onSaved,
 }: AddTransactionModalProps) {
-  const addTransaction = useTransactionStore((state) => state.addTransaction);
+  // const addTransaction = useTransactionStore((state) => state.addTransaction);
 
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("expense");
@@ -99,17 +99,9 @@ export default function AddTransactionModal({
       .single();
 
     if (error) {
-      setErrorMsg("Failed to save transaction");
+      Alert.alert("Failed to save transaction");
       console.error(error);
     } else {
-      addTransaction({
-        id: data.id,
-        amount: data.amount,
-        type: data.type,
-        category_id: data.category_id,
-        description: data.description,
-        date: data.date,
-      });
       onSaved();
       onClose();
       resetForm();

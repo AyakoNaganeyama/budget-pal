@@ -1,7 +1,7 @@
-import { useTransactionStore } from "@/globalStore/transactionStore";
 import { supabase } from "@/util/supabase";
+import { getMonthlyTransactions } from "./getMonthly";
 
-export const deleteTransaction = async (transactionId: string) => {
+export const deleteTransaction = async (transactionId: string,monthDate: Date) => {
   // Get current session
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
   if (sessionError || !session) {
@@ -23,7 +23,10 @@ export const deleteTransaction = async (transactionId: string) => {
     return false;
   }
 
-   useTransactionStore.getState().removeTransaction(transactionId);
+  await getMonthlyTransactions(userId, monthDate);
+
+  //  useTransactionStore.getState().removeTransaction(transactionId);
+
 
   return true;
 };

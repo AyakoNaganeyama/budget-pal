@@ -1,8 +1,9 @@
 import { Transaction, useTransactionStore } from "@/globalStore/transactionStore";
 import { supabase } from "@/util/supabase";
 
-export const getMonthlyTransactions = async (userId: string) => {
-  const startOfMonth = new Date();
+export const getMonthlyTransactions = async (userId: string, monthDate?: Date) => {
+  const date = monthDate ?? new Date();
+  const startOfMonth = new Date(date);
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 

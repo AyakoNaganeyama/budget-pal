@@ -9,12 +9,14 @@ interface TransactionCardsProps {
   transactions: Transaction[];
   colorScheme: "light" | "dark";
   onEdit?: (id: string) => void;
+  selectedDate: Date;
 }
 
 export default function TransactionCards({
   transactions,
   colorScheme,
   onEdit,
+  selectedDate,
 }: TransactionCardsProps) {
   const themeColors = Colors[colorScheme ?? "light"];
 
@@ -42,7 +44,7 @@ export default function TransactionCards({
           text: "Delete",
           style: "destructive",
           onPress: async () => {
-            const success = await deleteTransaction(id);
+            const success = await deleteTransaction(id, selectedDate);
             if (success) Alert.alert("Transaction deleted");
           },
         },
