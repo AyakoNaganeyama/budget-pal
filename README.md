@@ -1,51 +1,162 @@
-# Welcome to your Expo app 👋
+📊 React Native Expense Tracker App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A simple personal expense tracker built with Expo, Supabase, Zustand, and TypeScript.
 
-## Get started
+This project allows users to track their expenses, visualize categories in a monthly donut chart, and manage expense entries with add / edit / delete features — all synced securely with Supabase Authentication + Database.
 
-1. Install dependencies
+✨ Features
+🔐 Authentication (Supabase)
 
-   ```bash
-   npm install
-   ```
+Email + password signup
 
-2. Start the app
+Email confirmation support
 
-   ```bash
-   npx expo start
-   ```
+Secure login
 
-In the output, you'll find options to open the app in a
+Persisted session (AsyncStorage)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Auto token refresh + app-state handling
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+💸 Expense Tracking
 
-## Get a fresh project
+Add new expenses
 
-When you're ready, run:
+Edit saved expenses
 
-```bash
-npm run reset-project
-```
+Delete expenses with confirmation
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+View all expenses for the selected month
 
-## Learn more
+Zustand store for fast UI updates
 
-To learn more about developing your project with Expo, look at the following resources:
+📅 Month Picker
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Choose any month & year
 
-## Join the community
+Automatically load expenses for selected period
 
-Join our community of developers creating universal apps.
+Shows label like “November 2025”
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-# budget-pal
+📊 Monthly Donut Chart
+
+Groups expenses by category
+
+Auto-generated HSL colors
+
+Interactive tooltips
+
+Clean list summary with totals
+
+🎨 Dark / Light Theme
+
+Fully supports system color scheme
+
+Uses shared theme file
+
+🏗️ Tech Stack
+Purpose Technology
+Framework React Native (Expo)
+Backend Supabase (Auth & Database)
+Local Storage AsyncStorage
+State Management Zustand
+Charts react-native-gifted-charts
+Date Picker @react-native-community/datetimepicker
+Navigation Expo Router
+Language TypeScript
+📦 Folder Structure
+/app
+/ (auth)
+/ (tabs)
+RootLayout.tsx
+
+/api
+getMonthly.ts
+deleteTransaction.ts
+
+/components
+Cards.tsx
+Modal.tsx
+MonthlyDonutChart.tsx
+TransactionModal.tsx
+
+/globalStore
+transactionStore.ts
+userStore.ts
+
+/hooks
+useLogin.ts
+useSignup.ts
+
+🔧 Environment Variables
+
+Create .env:
+
+EXPO_PUBLIC_SUPABASE_URL=your-url
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+
+🚀 Installation & Setup
+npm install
+npm install react-native-gifted-charts
+npm install @react-native-async-storage/async-storage
+npm install @react-native-community/datetimepicker
+npm install @react-native-picker/picker
+expo install expo-router
+
+Run app:
+
+npx expo start
+
+🔐 Supabase Setup
+categories
+Column Type
+id uuid
+name text
+transactions
+Column Type
+id uuid
+user_id uuid
+amount numeric
+category_id uuid
+date date
+description text
+
+No “income” field is required — the app handles expenses only.
+
+🔍 Core Logic
+💾 Get Monthly Expenses
+
+getMonthlyTransactions():
+
+calculates month boundaries
+
+fetches only the user’s expenses
+
+updates Zustand store
+
+➕ Add Expense
+
+Includes:
+
+amount
+
+category
+
+date
+
+optional description
+
+✏️ Edit Expense
+
+loads expense data
+
+updates fields
+
+saves to Supabase
+
+❌ Delete Expense
+
+confirms deletion
+
+removes from Supabase
+
+reloads monthly expenses
