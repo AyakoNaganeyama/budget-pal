@@ -8,8 +8,10 @@ import { useTransactionStore } from "@/globalStore/transactionStore";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { supabase } from "@/util/supabase";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useCallback, useEffect, useState } from "react";
 import {
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -27,6 +29,9 @@ export default function DashboardScreen() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [monthYearLabel, setMonthYearLabel] = useState("");
+  const [showPicker, setShowPicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const handleEdit = (id: string) => {
     setSelectedTransactionId(id);
@@ -41,7 +46,25 @@ export default function DashboardScreen() {
       data: { session },
     } = await supabase.auth.getSession();
     if (session) {
-      await getMonthlyTransactions(session.user.id);
+      const data = await getMonthlyTransactions(session.user.id);
+
+      // Update month-year label based on the first transaction (or latest)
+      if (data && data.length > 0) {
+        const transactionDate = new Date(data[0].date);
+        const label = transactionDate.toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        });
+        setMonthYearLabel(label);
+      } else {
+        // No transactions, use current month/year
+        const now = new Date();
+        const label = now.toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        });
+        setMonthYearLabel(label);
+      }
     }
     setRefreshing(false);
   }, []);
@@ -52,12 +75,17 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     setDisplayTransactions(transactions);
-  }, [transactions]);
 
-  const monthYearLabel = new Date().toLocaleString("default", {
-    month: "long",
-    year: "numeric",
-  });
+    // Update month-year label whenever transactions change
+    if (transactions && transactions.length > 0) {
+      const transactionDate = new Date(transactions[0].date);
+      const label = transactionDate.toLocaleString("default", {
+        month: "long",
+        year: "numeric",
+      });
+      setMonthYearLabel(label);
+    }
+  }, [transactions]);
 
   return (
     <>
@@ -76,9 +104,60 @@ export default function DashboardScreen() {
             />
           }
         >
-          <Text style={[styles.monthLabel, { color: themeColors.text }]}>
-            {monthYearLabel}
-          </Text>
+          <TouchableOpacity onPress={() => setShowPicker(true)}>
+            <Text style={[styles.monthLabel, { color: themeColors.text }]}>
+              {monthYearLabel || "Select Month"}
+            </Text>
+          </TouchableOpacity>
+
+          {showPicker && (
+            <View style={{ marginVertical: 10 }}>
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display="spinner"
+                onChange={(event, date) => {
+                  if (date) setSelectedDate(date);
+
+                  // Optionally update label live on iOS
+                  if (Platform.OS === "ios" && date) {
+                    const label = date.toLocaleString("default", {
+                      month: "long",
+                      year: "numeric",
+                    });
+                    setMonthYearLabel(label);
+                  }
+                }}
+              />
+
+              {/* Save Button */}
+              <TouchableOpacity
+                onPress={() => {
+                  setShowPicker(false);
+
+                  // Update monthYearLabel for Android or final selection
+                  const label = selectedDate.toLocaleString("default", {
+                    month: "long",
+                    year: "numeric",
+                  });
+                  setMonthYearLabel(label);
+                  console.log("Saved Month/Year:", label);
+
+                  // Optionally refresh transactions for selected month
+                  // refreshTransactionsForMonth(selectedDate);
+                }}
+                style={{
+                  backgroundColor: themeColors.tint,
+                  padding: 10,
+                  borderRadius: 8,
+                  marginTop: 10,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "#fff", fontWeight: "bold" }}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* Render the chart */}
           {displayTransactions.length > 0 ? (
