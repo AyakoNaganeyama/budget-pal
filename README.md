@@ -67,6 +67,65 @@ It mainly uses two tables:
 - `categories` – list of expense categories (e.g. `Food`, `Transport`, `Rent`)
 - `transactions` – each expense, linked to a user and a category
 
+## 📸 Screenshots
+
+---
+
+### Login Screen
+
+![alt text](./assets/screenshots/login.png)
+
+---
+
+### Signup Screen
+
+![alt text](./assets/screenshots/signup.png)
+
+---
+
+### Login Successful
+
+![alt text](./assets/screenshots/image.png)
+
+---
+
+### Dashboard (Monthly Overview – Donut Chart & Total Sum by Category)
+
+![alt text](./assets/screenshots/image-1.png)
+
+---
+
+### Month Picker (Choosing Date)
+
+![alt text](./assets/screenshots/image-2.png)
+
+---
+
+### Selected Month Budget (Chosen Period)
+
+![alt text](./assets/screenshots/image-3.png)
+
+---
+
+### Transaction List / History Cards
+
+![alt text](./assets/screenshots/image-4.png)
+
+---
+
+### Add Expense Modal
+
+![alt text](./assets/screenshots/image-5.png)
+![alt text](./assets/screenshots/image-6.png)
+
+---
+
+### Edit Expense Modal
+
+![alt text](./assets/screenshots/image-7.png)
+
+---
+
 ## 📦 Folder Structure
 
 ```bash
@@ -78,6 +137,9 @@ It mainly uses two tables:
 /api
   getMonthly.ts
   deleteTransaction.ts
+  editTransaction.ts
+  fectCategory.ts
+  addTransaction.ts
 
 /components
   Cards.tsx
@@ -92,6 +154,10 @@ It mainly uses two tables:
 /hooks
   useLogin.ts
   useSignup.ts
+
+
+
+
 
 
 

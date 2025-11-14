@@ -1,6 +1,5 @@
 // api/updateTransaction.ts
 import { supabase } from "@/util/supabase";
-
 export interface UpdateTransactionPayload {
   id: string;
   amount: number;

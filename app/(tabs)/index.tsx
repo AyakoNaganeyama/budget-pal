@@ -217,7 +217,6 @@ export default function DashboardScreen() {
           }
         }}
       />
-
       <EditTransactionModal
         visible={editModalVisible}
         onClose={() => setEditModalVisible(false)}
