@@ -1,8 +1,9 @@
+import { updateTransaction } from "@/api/editTransactions";
+import { Category, fetchCategories } from "@/api/fetchCategory";
 import {
   Transaction,
   useTransactionStore,
 } from "@/globalStore/transactionStore";
-import { supabase } from "@/util/supabase";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
@@ -41,28 +42,22 @@ export default function EditTransactionModal({
 
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [amount, setAmount] = useState("");
-  const [type, setType] = useState("expense");
+  const [type, setType] = useState<"expense" | "income">("expense");
   const [category, setCategory] = useState<string | undefined>();
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
-    []
-  );
+  const [categories, setCategories] = useState<Category[]>([]);
   const [date, setDate] = useState(new Date());
   const [description, setDescription] = useState("");
 
   const [categoryPickerVisible, setCategoryPickerVisible] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
 
-  // Fetch categories from Supabase
+  // Fetch categories using API
   useEffect(() => {
-    const fetchCategories = async () => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("id, name")
-        .order("name");
-      if (error) console.error("Error fetching categories:", error);
-      else setCategories(data || []);
+    const loadCategories = async () => {
+      const data = await fetchCategories();
+      setCategories(data);
     };
-    fetchCategories();
+    loadCategories();
   }, []);
 
   // Set initial transaction values
@@ -71,53 +66,33 @@ export default function EditTransactionModal({
     if (t) {
       setTransaction(t);
       setAmount(t.amount.toString());
-      setType("expense");
+      setType("expense"); // or t.type if you still store it
+      // adjust based on how category is shaped in Transaction
+      // here we assume t.category_id is an array with id property
+      // if different, just tweak this line
+      // @ts-ignore (adjust according to your Transaction type)
       setCategory(t.category_id?.[0]?.id);
       setDate(new Date(t.date));
       setDescription(t.description || "");
     }
   }, [transactionId, transactions]);
 
-  // Save edited transaction
   const handleSave = async () => {
     if (!transaction) return;
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) return;
+    const success = await updateTransaction({
+      id: transaction.id,
+      amount: Number(amount),
+      type,
+      categoryId: category,
+      date,
+      description,
+    });
 
-    const { error } = await supabase
-      .from("transactions")
-      .update({
-        amount: Number(amount),
-        type,
-        category_id: category,
-        date: date.toISOString().split("T")[0],
-        description,
-      })
-      .eq("id", transaction.id)
-      .eq("user_id", session.user.id);
-
-    if (error) {
-      console.error("Error updating transaction:", error);
+    if (!success) {
+      // you can later show a toast / error message here
       return;
     }
-
-    // Update Zustand store
-    // const updatedTransactions = transactions.map((t) =>
-    //   t.id === transaction.id
-    //     ? {
-    //         ...t,
-    //         amount: Number(amount),
-    //         type,
-    //         category_id: categories.filter((c) => c.id === category),
-    //         date: date.toISOString(),
-    //         description,
-    //       }
-    //     : t
-    // );
-    // updateTransactionInStore(updatedTransactions);
 
     onUpdated?.();
     onClose();
@@ -147,7 +122,7 @@ export default function EditTransactionModal({
                   onChangeText={setAmount}
                 />
 
-                {/* Type picker */}
+                {/* Type picker (if you still want it) */}
                 <View style={{ marginVertical: 5 }}>
                   <Text style={{ color: "white", marginBottom: 5 }}>Type</Text>
                   <TouchableOpacity
