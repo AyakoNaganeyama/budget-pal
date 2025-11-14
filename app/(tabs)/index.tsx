@@ -1,8 +1,8 @@
 import { getMonthlyTransactions } from "@/api/getMonthly";
+import AddTransactionModal from "@/components/AddTransactionModal";
 import TransactionCards from "@/components/Cards";
-import AddTransactionModal from "@/components/Modal";
+import EditTransactionModal from "@/components/EditTransactionModal";
 import MonthlyDonutChart from "@/components/MonthlyDounutChart";
-import EditTransactionModal from "@/components/TransactionModal";
 import { Colors } from "@/constants/theme";
 import { useTransactionStore } from "@/globalStore/transactionStore";
 import { useColorScheme } from "@/hooks/use-color-scheme";
