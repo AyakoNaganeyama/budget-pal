@@ -29,8 +29,6 @@ This project allows users to:
 - View all expenses for the selected month
 - Fast UI updates with **Zustand** store
 
-> 📝 **Note:** This app tracks **expenses only**. No income field is used.
-
 ### 📅 Month Picker
 
 - Choose any **month & year**
@@ -43,13 +41,6 @@ This project allows users to:
 - Auto-generated **HSL colors**
 - Interactive tooltips
 - Clean list summary with **category totals**
-
-### 🎨 Dark / Light Theme
-
-- Fully supports system color scheme
-- Uses a shared theme file for consistent styling
-
----
 
 ## 🏗️ Tech Stack
 

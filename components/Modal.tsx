@@ -1,4 +1,5 @@
-import { supabase } from "@/util/supabase";
+import { addTransaction } from "@/api/addTransactions";
+import { fetchCategories } from "@/api/fetchCategory";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
@@ -28,14 +29,10 @@ export default function AddTransactionModal({
   onClose,
   onSaved,
 }: AddTransactionModalProps) {
-  // const addTransaction = useTransactionStore((state) => state.addTransaction);
-
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("expense");
   const [category, setCategory] = useState<string | undefined>();
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
-    []
-  );
+  const [categories, setCategories] = useState<Category[]>([]);
   const [date, setDate] = useState(new Date());
   const [description, setDescription] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -46,15 +43,11 @@ export default function AddTransactionModal({
 
   // Fetch categories
   useEffect(() => {
-    const fetchCategories = async () => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("id, name")
-        .order("name");
-      if (error) console.error("Error fetching categories:", error);
-      else setCategories(data || []);
+    const loadCategories = async () => {
+      const data = await fetchCategories();
+      setCategories(data);
     };
-    fetchCategories();
+    loadCategories();
   }, []);
 
   const resetForm = () => {
@@ -73,40 +66,27 @@ export default function AddTransactionModal({
     }
 
     setLoading(true);
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    setErrorMsg("");
 
-    if (!session) {
-      setErrorMsg("User not logged in");
-      setLoading(false);
-      return;
-    }
+    try {
+      await addTransaction({
+        amount: Number(amount),
+        type: "expense", // or "expense" if you remove income completely
+        categoryId: category,
+        description,
+        date,
+      });
 
-    const { data, error } = await supabase
-      .from("transactions")
-      .insert([
-        {
-          user_id: session.user.id,
-          amount: Number(amount),
-          type,
-          category_id: category,
-          description,
-          date: date.toISOString().split("T")[0],
-        },
-      ])
-      .select()
-      .single();
-
-    if (error) {
-      Alert.alert("Failed to save transaction");
-      console.error(error);
-    } else {
       onSaved();
       onClose();
       resetForm();
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || "Failed to save transaction");
+      Alert.alert("Failed to save transaction");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -134,14 +114,12 @@ export default function AddTransactionModal({
                 onChangeText={setAmount}
               />
 
-              {/* Type picker */}
+              {/* Type picker (optional – remove if only expense) */}
               <View style={{ marginVertical: 5 }}>
                 <Text style={styles.label}>Type</Text>
                 <TouchableOpacity
                   style={styles.input}
-                  onPress={() =>
-                    setType(type === "expense" ? "income" : "expense")
-                  }
+                  onPress={() => setType("expense")}
                 >
                   <Text style={{ color: "white" }}>{type}</Text>
                 </TouchableOpacity>
@@ -317,7 +295,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     margin: 10,
     alignItems: "center",
-
     marginBottom: 30,
   },
   cancel: { backgroundColor: "#f44336" },
@@ -328,16 +305,12 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     paddingBottom: 20,
   },
-  pickerModal: {
-    backgroundColor: "#1e1e1e",
-    padding: 20,
-  },
   pickerModalIOS: {
     backgroundColor: "#1e1e1e",
     padding: 20,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
-    justifyContent: "flex-end", // content sticks to bottom
-    maxHeight: "50%", // prevents modal from taking full screen
+    justifyContent: "flex-end",
+    maxHeight: "50%",
   },
 });
