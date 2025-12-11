@@ -5,7 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { AppState } from "react-native";
 import "react-native-reanimated";
-import { supabase } from "../util/supabase"; // adjust path
+import { supabase } from "../util/supabase";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
@@ -15,7 +15,7 @@ export default function RootLayout() {
   const router = useRouter();
 
   useEffect(() => {
-    // 1️⃣ Handle auth state changes
+    // Handle auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log("🟡 Auth state changed:", event);
@@ -30,7 +30,7 @@ export default function RootLayout() {
       }
     );
 
-    // 2️⃣ Handle app state for auto-refresh
+    // Handle app state for auto-refresh
     const subscription = AppState.addEventListener("change", (state) => {
       if (state === "active") supabase.auth.startAutoRefresh();
       else supabase.auth.stopAutoRefresh();
